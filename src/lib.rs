@@ -295,6 +295,11 @@ fn open_browser_internal(browser: Browser, url: &str) -> Result<ExitStatus> {
         )),
     }
 }
+
+fn is_gitpod_workspace() -> bool {
+    std::env::var("GITPOD_REPO_ROOT").is_ok()
+}
+
 #[cfg(any(
     target_os = "linux",
     target_os = "freebsd",
@@ -321,6 +326,9 @@ fn open_on_unix_using_browser_env(url: &str) -> Result<ExitStatus> {
             if !browser.contains("%s") {
                 // append the url as an argument only if it was not already set via %s
                 cmd.arg(url);
+            }
+            if is_gitpod_workspace() {
+                cmd.arg("--external");
             }
             if let Ok(status) = cmd.status() {
                 return Ok(status);
